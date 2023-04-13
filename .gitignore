@@ -3,4 +3,4 @@ Duolingo.iml
 out/
 src/Main.class
 src/Test.java
-#src/data/login_info.txt
+src/data/login_info.txt
