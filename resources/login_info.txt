@@ -1,0 +1,4 @@
+# login (mail or username) ↓
+example@mail.ru
+# password ↓
+qwerty123
