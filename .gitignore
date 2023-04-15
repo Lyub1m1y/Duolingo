@@ -3,4 +3,4 @@ Duolingo.iml
 out/
 **.class
 src/main/java/org/duolingo/Test.java
-#src/main/java/org/duolingo/login_info.txt
+src/main/java/org/duolingo/login_info.txt
