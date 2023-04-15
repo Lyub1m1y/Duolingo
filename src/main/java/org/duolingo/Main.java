@@ -1,3 +1,5 @@
+package org.duolingo;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -9,12 +11,13 @@ import java.io.IOException;
 
 public class Main {
 
-  private static final String FILE_PATH = "../resources/login_info.txt";
+  private static final String FILE_PATH = "src/main/resources/login_info.txt";
 
   public static void main(String[] args) {
     WebDriver driver = new FirefoxDriver();
     driver.get("https://www.duolingo.com/");
 
+//    driver.findElements(By.ByXPath.xpath("".get));
     loggingInAccount(driver);
 
     while (true) {
@@ -52,6 +55,10 @@ public class Main {
   }
 
   public static void readFileData(StringBuilder login, StringBuilder password) {
+    System.out.println("----------hui-------------");
+    System.out.println(System.getProperty("user.dir"));
+    System.out.println(FILE_PATH);
+    System.out.println("----------hui-------------");
     try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
       String line;
       int lineCount = 1;

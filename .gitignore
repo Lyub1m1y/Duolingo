@@ -1,6 +1,6 @@
 .idea
 Duolingo.iml
 out/
-src/Main.class
-src/Test.java
-src/data/login_info.txt
+**.class
+src/main/java/org/duolingo/Test.java
+#src/main/java/org/duolingo/login_info.txt
