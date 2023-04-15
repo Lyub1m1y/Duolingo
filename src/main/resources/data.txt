@@ -2,3 +2,5 @@
 example@mail.ru
 # password ↓
 qwerty123
+# Your api key from Lecto AI ↓
+T53KG5-7COPJPC-EXAMPLE-T6FHBRH
