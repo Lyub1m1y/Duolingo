@@ -1,4 +1,4 @@
-# login (mail or username) ↓
+# username (mail or username) ↓
 example@mail.ru
 # password ↓
 qwerty123
