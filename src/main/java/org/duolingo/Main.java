@@ -1,10 +1,5 @@
 package org.duolingo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.InputStreamReader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -14,28 +9,41 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 public class Main {
 
   private static final String FILE_PATH = "src/main/resources/data.txt";
+  private static final String DUOLINGO_SITE = "https://www.duolingo.com/";
+  private static final String TRANSLATOR_SITE = "window.open('https://translate.yandex.ru/?source_lang=en&target_lang=ru&', '_blank');";
+  private static final WebDriver driver = new FirefoxDriver();
+  private static final JavascriptExecutor js = (JavascriptExecutor) driver;
 
+  private static ArrayList<String> tabs;
   private static StringBuilder login = new StringBuilder();
   private static StringBuilder password = new StringBuilder();
-  private static StringBuilder keyApi = new StringBuilder();
 
-  public static void main(String[] args) throws IOException {
-    WebDriver driver = new FirefoxDriver();
-    driver.get("https://www.duolingo.com/");
 
-    loggingInAccount(driver);
+  public static void main(String[] args) {
+
+    driver.get(DUOLINGO_SITE);
+
+    loggingInAccount();
+
+    // Open a new tab with DeepL Translator
+    js.executeScript(TRANSLATOR_SITE);
+    tabs = new ArrayList<String>(driver.getWindowHandles());
+    // Switch to the Duolingo tab
+    driver.switchTo().window(tabs.get(0));
 
     while (true) {
-      startLevel(driver);
-      passingLevel(driver);
-      exitTask(driver);
+      startLevel();
+      passingLevel();
+      exitTask();
     }
   }
 
-  public static void loggingInAccount(WebDriver driver) {
+  public static void loggingInAccount() {
     try {
       // Open login page
       driver.findElement(
@@ -43,7 +51,7 @@ public class Main {
           .click();
 
       // Enter login credentials
-      readFileData(login, password, keyApi);
+      readFileData(login, password);
       driver.findElement(By.ByXPath.xpath(
               "/html/body/div[2]/div[2]/div/div/form/div[1]/div[1]/div[1]/label/div/input"))
           .sendKeys(login);
@@ -60,8 +68,7 @@ public class Main {
     }
   }
 
-  public static void readFileData(StringBuilder login, StringBuilder password,
-      StringBuilder keyApi) {
+  public static void readFileData(StringBuilder login, StringBuilder password) {
     try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
       String line;
       int lineCount = 1;
@@ -70,8 +77,6 @@ public class Main {
           login.append(line);
         } else if (lineCount == 4) {
           password.append(line);
-        } else if (lineCount == 6) {
-          keyApi.append(line);
         }
         lineCount++;
       }
@@ -90,7 +95,7 @@ public class Main {
     }
   }
 
-  public static void startLevel(WebDriver driver) {
+  public static void startLevel() {
     try {
       delay(9);
       // Scroll to the bottom of the page
@@ -125,67 +130,37 @@ public class Main {
     }
   }
 
-  public static void passingLevel(WebDriver driver) throws IOException {
-    // Task 1
-    String answer;
+  public static void passingLevel() {
     for (int i = 0; i < 5; i++) {
-      answer(driver, translate(driver.findElement(By.xpath(
+      answer(translate(driver.findElement(By.xpath(
               "/html/body/div[1]/div[1]/div/div/div[2]/div/div/div/div/div[2]/div[1]/div/div[2]/div[1]/div/span"))
           .getText()));
     }
   }
 
-  public static String translate(String input) throws IOException {
-    String to = "en";
-    String from = "ru";
-    String url = "https://api.lecto.ai/v1/translate/text";
+  public static String translate(String input) {
+    // Switch to the Translator tab
+    driver.switchTo().window(tabs.get(1));
 
-    String[] cmd = {"curl", "-X", "POST", "-H", "X-API-Key: " + keyApi, "-H",
-        "Content-Type: application/json", "-H",
-        "Accept: application/json", "--data-raw",
-        "{\"texts\": " + toJson(input) + ", \"to\": " + toJson(to) + ", \"from\": \"" + from
-            + "\"}",
-        url};
+    // Translate
+    driver.findElement(By.ByXPath.xpath(
+            "//*[@id=\"textarea\"]"))
+        .clear();
+    driver.findElement(By.ByXPath.xpath(
+            "//*[@id=\"textarea\"]"))
+        .sendKeys(" " + input);
+    delay(2);
+    String answer = driver.findElement(By.xpath(
+            "/html/body/div[1]/main/div[1]/div[1]/div[3]/div[2]/div[1]/div[1]/div[1]/pre/span"))
+        .getText();
+    delay(0.5);
+    // Switch to the Duolingo tab
+    driver.switchTo().window(tabs.get(0));
 
-    ProcessBuilder pb = new ProcessBuilder(cmd);
-    Process p = pb.start();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-    String line;
-    StringBuilder response = new StringBuilder();
-    while ((line = reader.readLine()) != null) {
-      response.append(line);
-    }
-
-    System.out.println("-------input---------");
-    System.out.println(input);
-    System.out.println("-------input---------");
-    System.out.println("-------json---------");
-    System.out.println(response.toString());
-    System.out.println("-------json---------");
-    System.out.println("-------answer---------");
-    String an = getAnswer(response.toString());
-    System.out.println(an);
-    System.out.println("-------anwer---------");
-    return an;
+    return answer;
   }
 
-  private static String getAnswer(String json) throws JsonProcessingException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode rootNode = objectMapper.readTree(json);
-    return rootNode.get("translations").get(0).get("translated").get(0).asText();
-  }
-
-  private static String toJson(String array) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("[\"");
-    sb.append(array
-    );
-    sb.append("\"]");
-    return sb.toString();
-  }
-
-  public static void answer(WebDriver driver, String answer) {
+  public static void answer(String answer) {
     try {
       delay(0.3);
       driver.findElement(By.ByXPath.xpath(
@@ -201,7 +176,7 @@ public class Main {
     }
   }
 
-  public static void exitTask(WebDriver driver) {
+  public static void exitTask() {
     // Exit task
     try {
       delay(3);
