@@ -3,4 +3,4 @@ Duolingo.iml
 out/
 target/
 src/main/java/org/duolingo/Test.java
-src/main/resources/data.txt
+#src/main/resources/data.txt
