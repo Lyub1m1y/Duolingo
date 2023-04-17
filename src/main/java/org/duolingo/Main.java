@@ -13,9 +13,14 @@ import java.util.ArrayList;
 
 public class Main {
 
-  private static final String FILE_PATH = "src/main/resources/data.txt";
+  //  private static final String INPUT_SECTION = "//*[@id=\\\"textarea\\\"]";
+//  private static final String OUTPUT_SECTION = "/html/body/div[1]/main/div[1]/div[1]/div[3]/div[2]/div[1]/div[1]/div[1]/pre/span";
+  private static final String INPUT_SECTION = "//*[@id=\"panelTranslateText\"]/div[1]/div[2]/section[1]/div[3]/div[2]/d-textarea/div";
+  private static final String OUTPUT_SECTION = "//*[@id=\"panelTranslateText\"]/div[1]/div[2]/section[2]/div[3]/div[1]/d-textarea/div";
+
   private static final String DUOLINGO_SITE = "https://www.duolingo.com/";
-  private static final String TRANSLATOR_SITE = "window.open('https://translate.yandex.ru/?source_lang=en&target_lang=ru&', '_blank');";
+  //  private static final String TRANSLATOR_SITE = "window.open('https://translate.yandex.ru/?source_lang=en&target_lang=ru&', '_blank');";
+  private static final String TRANSLATOR_SITE = "window.open('https://www.deepl.com/translator#ru/en/', '_blank');";
   private static final WebDriver driver = new FirefoxDriver();
   private static final JavascriptExecutor js = (JavascriptExecutor) driver;
 
@@ -25,63 +30,31 @@ public class Main {
 
 
   public static void main(String[] args) {
-
     driver.get(DUOLINGO_SITE);
-
-    loggingInAccount();
-
-    // Open a new tab with DeepL Translator
+    // Open a new tab with Translator
     js.executeScript(TRANSLATOR_SITE);
     tabs = new ArrayList<String>(driver.getWindowHandles());
     // Switch to the Duolingo tab
     driver.switchTo().window(tabs.get(0));
 
+    try {
+      DataParser dataParser = new DataParser();
+    } catch (Exception e) {
+      System.out.println("An exception occurred: " + e.getMessage());
+    }
+    try {
+      LoginPage loginPage = new LoginPage(driver);
+      loginPage.enterUsername();
+      loginPage.enterPassword();
+      loginPage.clickLoginButton();
+    } catch (Exception e) {
+      System.out.println("An exception occurred: " + e.getMessage());
+    }
+
     while (true) {
       startLevel();
       passingLevel();
       exitTask();
-    }
-  }
-
-  public static void loggingInAccount() {
-    try {
-      // Open login page
-      driver.findElement(
-              By.ByXPath.xpath("/html/body/div[1]/div[1]/div/div[2]/div[1]/div[2]/div[2]/button"))
-          .click();
-
-      // Enter login credentials
-      readFileData(login, password);
-      driver.findElement(By.ByXPath.xpath(
-              "/html/body/div[2]/div[2]/div/div/form/div[1]/div[1]/div[1]/label/div/input"))
-          .sendKeys(login);
-      driver.findElement(By.ByXPath.xpath(
-              "/html/body/div[2]/div[2]/div/div/form/div[1]/div[1]/div[2]/label/div[1]/input"))
-          .sendKeys(password);
-
-      // Click the "Log in" button
-      delay(1);
-      driver.findElement(By.ByXPath.xpath("/html/body/div[2]/div[2]/div/div/form/div[1]/button"))
-          .click();
-    } catch (Exception e) {
-      System.out.println("An exception occurred: " + e.getMessage());
-    }
-  }
-
-  public static void readFileData(StringBuilder login, StringBuilder password) {
-    try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-      String line;
-      int lineCount = 1;
-      while ((line = reader.readLine()) != null && lineCount != 7) {
-        if (lineCount == 2) {
-          login.append(line);
-        } else if (lineCount == 4) {
-          password.append(line);
-        }
-        lineCount++;
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
     }
   }
 
@@ -144,14 +117,14 @@ public class Main {
 
     // Translate
     driver.findElement(By.ByXPath.xpath(
-            "//*[@id=\"textarea\"]"))
+            INPUT_SECTION))
         .clear();
     driver.findElement(By.ByXPath.xpath(
-            "//*[@id=\"textarea\"]"))
+            INPUT_SECTION))
         .sendKeys(" " + input);
     delay(2);
     String answer = driver.findElement(By.xpath(
-            "/html/body/div[1]/main/div[1]/div[1]/div[3]/div[2]/div[1]/div[1]/div[1]/pre/span"))
+            OUTPUT_SECTION))
         .getText();
     delay(0.5);
     // Switch to the Duolingo tab
