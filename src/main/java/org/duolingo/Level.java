@@ -26,9 +26,8 @@ public class Level {
       JavascriptExecutor js = (JavascriptExecutor) driver;
       // Scroll by a specific amount of pixels
       js.executeScript(
-          "window.scrollTo(0, 1402);"); // start position 8322px, but need absolute 1402px
+          "window.scrollTo(0, 1402);"); // I have a starting position 8322px, but need absolute 1402px
       // Select level
-      delay(2);
       driver.findElement(By.ByXPath.xpath(
               "/html/body/div[1]/div[2]/div/div[2]/div/div[2]/div[1]/section[2]/div/div[12]/button"))
           .click();
