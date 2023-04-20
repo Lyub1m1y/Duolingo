@@ -5,8 +5,8 @@ import org.openqa.selenium.WebDriver;
 
 public class LoginPage {
 
-  private WebDriver driver;
-  private Data data = Data.getInstance();
+  private final WebDriver driver;
+  private final Data data = Data.getInstance();
 
   private static final String LOGIN_PAGE = "/html/body/div[1]/div[1]/div/div[2]/div[1]/div[2]/div[2]/button";
   private static final String USERNAME_FIELD = "/html/body/div[2]/div[2]/div/div/form/div[1]/div[1]/div[1]/label/div/input";

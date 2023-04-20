@@ -3,8 +3,8 @@ package org.duolingo;
 public class Data {
 
   private static Data instance = null;
-  private StringBuilder username;
-  private StringBuilder password;
+  private final StringBuilder username;
+  private final StringBuilder password;
 
   private Data() {
     this.username = new StringBuilder();
